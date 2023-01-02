@@ -9,14 +9,14 @@ from mss import mss
 import webbrowser
 from PIL import ImageGrab
 import os
-# webbrowser.open("https://looptap.tlk.li/")
+webbrowser.open("https://looptap.tlk.li/")
 
 time.sleep(5)
 
 x_res = 3072
 y_res = 1920
 
-play = (882, 491)
+play = (int(0.28720*x_res), int(0.25572*y_res))
 pyautogui.moveTo(play)
 pyautogui.click()
 capture_region_ratios = {
