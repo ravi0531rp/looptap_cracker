@@ -2,15 +2,12 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
-import pyautogui
-import time
-from loguru import logger
-from mss import mss
-import webbrowser
+import os
 
-# webbrowser.open("https://looptap.tlk.li/")
-
-time.sleep(5)
+try:
+    os.makedirs("../out_images")
+except:
+    pass
 
 x_res = 3072
 y_res = 1920
@@ -53,14 +50,28 @@ y5 = int(capture_region_ratios["y_min"]*y_res)
 x6 = int(capture_region_ratios["x_max"]*x_res)
 y6 = int(capture_region_ratios["y_max"]*y_res)
 
+print(y1,y2,x1,x2)
+print(y3,y4,x3,x4)
+print(y5,y6,x5,x6)
 
-while True:
+
+files = glob("../images/*.png")
+
+for file in files:
+    image = cv2.imread(file)
+    name = file.split("/")[-1].split(".")[0]
     image_orig = image.copy()
+    
     image = image[y5:y6, x5:x6]
     image[y3:y4, x3:x4] = 0
     image[y1:y2, x1:x2] = 0
+
     shape = image.shape
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _,thresh_img = cv2.threshold(image,100,255,cv2.THRESH_OTSU)
-    contours, _ = cv2.findContours(thresh_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(thresh_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    img_contours = np.zeros(shape)
+    cv2.drawContours(img_contours, contours, -1, (0,255,0), 3)
+    cv2.imwrite(f"../out_images/{name}_{len(contours)}.jpg", img_contours)
 
