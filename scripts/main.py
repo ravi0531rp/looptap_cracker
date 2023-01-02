@@ -8,8 +8,7 @@ from loguru import logger
 from mss import mss
 import webbrowser
 from PIL import ImageGrab
-import os
-webbrowser.open("https://looptap.tlk.li/")
+# webbrowser.open("https://looptap.tlk.li/")
 
 time.sleep(5)
 
@@ -58,32 +57,24 @@ y5 = int(capture_region_ratios["y_min"]*y_res)
 x6 = int(capture_region_ratios["x_max"]*x_res)
 y6 = int(capture_region_ratios["y_max"]*y_res)
 
+monitor = {"top": y5//2, "left": x5//2, "width": (x6-x5)//2, "height": (y6-y5)//2}
+
+
 while True:
-    t1 = time.perf_counter()
-    image = ImageGrab.grab()
-    image = np.array(image)
-    image = image[y5:y6, x5:x6]
-    image_orig = image.copy()
+    with mss() as sct:
+        image = np.array(sct.grab(monitor))
     image[y3:y4, x3:x4] = 0
     image[y1:y2, x1:x2] = 0
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    _,thresh_img = cv2.threshold(image,100,255,cv2.THRESH_OTSU)
+    _,thresh_img = cv2.threshold(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY),50,255,cv2.THRESH_OTSU)
     contours, _ = cv2.findContours(thresh_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    t2 = time.perf_counter()
-
-    print(t2 - t1)
     if len(contours) == 1:
-        print(1)
         pyautogui.click()
         continue
     if (len(contours) > 2):
-        print("many")
         continue
     if len(contours) == 2:
         for cont in contours:
             if cv2.contourArea(cont) < 100:
-                print(1)
                 pyautogui.click()
                 continue
-    print(2)
     
