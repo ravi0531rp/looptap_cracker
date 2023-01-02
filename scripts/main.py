@@ -11,10 +11,14 @@ from PIL import ImageGrab
 import os
 # webbrowser.open("https://looptap.tlk.li/")
 
-# time.sleep(5)
+time.sleep(5)
 
 x_res = 3072
 y_res = 1920
+
+play = (882, 491)
+pyautogui.moveTo(play)
+pyautogui.click()
 capture_region_ratios = {
     "x_min" : 0.32552 , 
     "y_min" : 0.15625,
@@ -54,29 +58,32 @@ y5 = int(capture_region_ratios["y_min"]*y_res)
 x6 = int(capture_region_ratios["x_max"]*x_res)
 y6 = int(capture_region_ratios["y_max"]*y_res)
 
-try:
-    os.makedirs("../dummy_images")
-except:
-    pass
-
-count = 0
 while True:
-    count += 1
+    t1 = time.perf_counter()
     image = ImageGrab.grab()
     image = np.array(image)
     image = image[y5:y6, x5:x6]
     image_orig = image.copy()
-    cv2.imwrite(f"../dummy_images/image_{count}.jpg", image_orig)
     image[y3:y4, x3:x4] = 0
     image[y1:y2, x1:x2] = 0
-    shape = image.shape
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _,thresh_img = cv2.threshold(image,100,255,cv2.THRESH_OTSU)
     contours, _ = cv2.findContours(thresh_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    t2 = time.perf_counter()
+
+    print(t2 - t1)
+    if len(contours) == 1:
+        print(1)
+        pyautogui.click()
+        continue
+    if (len(contours) > 2):
+        print("many")
+        continue
     if len(contours) == 2:
         for cont in contours:
-            logger.info(cv2.contourArea(cont))
-    logger.debug(f"Len Contours => {len(contours)}")
-    img_contours = np.zeros(shape)
-    cv2.drawContours(img_contours, contours, -1, (0,255,0), 3)
-    cv2.imwrite(f"../dummy_images/image_{count}_con.jpg", img_contours)
+            if cv2.contourArea(cont) < 100:
+                print(1)
+                pyautogui.click()
+                continue
+    print(2)
+    
